@@ -1,0 +1,97 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+  <meta charset="UTF-8" />
+  <meta http-equiv='cache-control' content='no-cache'>
+  <meta http-equiv='expires' content='0'>
+  <meta http-equiv='pragma' content='no-cache'>
+  <title>breakout</title>
+  <script src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <script type="text/javascript">
+    var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update })
+
+    function preload() {
+      game.stage.backgroundColor = '#3598db'
+      game.load.image('box', 'assets/box.png?v=1')
+      game.load.image('player', 'assets/player.png?v=1')
+      game.load.image('ball', 'assets/ball.png?v=1')
+    }
+    var player
+    var boxes
+    var ball
+    var keyPad
+
+    var score = 0
+    var scoreText
+
+    function create() {
+      game.physics.startSystem(Phaser.Physics.ARCADE)
+
+      keyPad = game.input.keyboard.createCursorKeys()  
+
+      player = game.add.sprite(50, 550, 'player')
+      game.physics.arcade.enable(player)
+
+      player.body.collideWorldBounds = true
+      player.enableBody = true
+      player.body.immovable = true
+
+      boxes = game.add.group()  
+
+      // Add 25 bricks to the group (5 columns and 5 lines)
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          // Create the brick at the correct position
+          var box = game.add.sprite(100+i*130, 55+j*70, 'box')
+          box.scale.setTo(3, 2)
+          // Make sure the brick won't move when the ball hits it
+          game.physics.arcade.enable(box)
+          box.body.collideWorldBounds = true
+          box.enableBody = true
+          box.body.immovable = true
+          // Add the brick to the group
+          boxes.add(box)
+          console.log('box: ', i,',',j)
+        }
+      }
+      ball = game.add.sprite(80, 500, 'ball')
+      game.physics.arcade.enable(ball)
+      ball.enableBody = true  
+      // Give the ball some initial speed
+      ball.body.velocity.x = 100
+      ball.body.velocity.y = 100
+      // Make sure the ball will bounce when hitting something
+      ball.body.bounce.setTo(1);
+      ball.body.collideWorldBounds = true
+      scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    }
+    function update() {
+      if (keyPad.left.isDown) {
+        player.body.velocity.x = -250
+        console.log('left')
+      } else if (keyPad.right.isDown) {
+        player.body.velocity.x = 250
+        console.log('right')
+      } else {
+        player.body.velocity.x = 0
+      }
+      game.physics.arcade.collide(player, ball)
+      game.physics.arcade.collide(ball, boxes, hit)
+    }
+    function hit(ball, brick) {  
+      brick.kill()
+      score += 10
+      scoreText.text = 'Score: ' + score
+    }
+    </script>
+
+  </body>
+  </html>
